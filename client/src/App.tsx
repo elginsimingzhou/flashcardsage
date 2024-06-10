@@ -1,35 +1,41 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+// import Deck from "./types/Deck";
+import { Link } from "react-router-dom";
+import { createDeck } from "./api/createDeck";
+import { TDeck, getDecks } from "./api/getDecks";
+import { deleteDeck } from "./api/deleteDeck";
 
 function App() {
-  const [decks, setDecks] = useState([]);
+  const [decks, setDecks] = useState<TDeck[]>([]);
   const [title, setTitle] = useState<string>("");
 
   //CORS error: Browser cannot access url that do not match same host name (ie client: 127.0.0.1 vs server:localhost:4000)
   async function handleCreateDeck(e: React.FormEvent) {
     e.preventDefault(); //form automatically refresh form and you lose data
-    await fetch("http://localhost:3000/decks", {
-      method: "POST",
-      body: JSON.stringify({
-        title,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+   
+    const deck = await createDeck(title) ;
+    setDecks([...decks,deck]);
     setTitle("");
+    
+  }
+
+  async function handleDelete(deckId: string) {
+    await deleteDeck(deckId)
+    //optimistiic update approach
+    setDecks(decks.filter((deck) => {return deck._id !== deckId}))
   }
 
   //concept of clean up function within useEffect
   //cannot use async await in useEffect => create another async function outside or anonymous function
   useEffect(() => {
-    async function fetchDecks() {
-      const response = await fetch("http://localhost:3000/decks");
-      const newDecks = await response.json();
-      setDecks(newDecks);
+    async function fetchDecks(){
+      const decks = await getDecks() ;
+      setDecks(decks);
     }
-
+    
     fetchDecks();
+
   }, []);
 
   return (
@@ -38,7 +44,12 @@ function App() {
       <div className="decks">
         <ul className="decks">
           {decks.map((deck) => {
-            return <li key={deck._id}>{deck.title}</li>;
+            return (
+              <li key={deck._id}>
+                <button onClick={()=> handleDelete(deck._id)}>Delete</button>
+                <Link to={`decks/${deck._id}`}>{deck.title}</Link>
+              </li>
+            );
           })}
         </ul>
       </div>

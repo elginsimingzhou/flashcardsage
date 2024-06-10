@@ -27,7 +27,14 @@ app.post("/decks", async (req: Request, res: Response) => {
   const createdDeck = await newDeck.save();
   res.json(createdDeck);
 
-  
+});
+
+//standard: return deleted item back to user
+app.delete("/decks/:deckId", async (req: Request, res: Response) => {
+  const deckId = req.params.deckId; 
+  const deck = await DeckModel.findByIdAndDelete(deckId);
+  res.json({message:"Successfully deleted the entry"})
+
 });
 
 mongoose.connect(process.env.MONGODB_URI!).then(() => {
