@@ -1,8 +1,13 @@
 require("dotenv").config();
-import express, { Request, Response } from "express";
+import express from "express";
 import mongoose from "mongoose";
-import DeckModel from "../models/Deck";
 import cors from 'cors';
+import { getDeckController } from "../controllers/getDeckController";
+import { getDecksController } from "../controllers/getDecksController";
+import { createDeckController } from "../controllers/createDeckController";
+import { deleteDeckController } from "../controllers/deleteDeckController";
+import { createCardForDeckController } from "../controllers/createCardForDeckController";
+import { deleteCardOnDeckController } from "../controllers/deleteCardOnDeckController";
 
 const PORT = 3000;
 
@@ -13,29 +18,13 @@ app.use(express.json()) // Know to parse body and what to do with headers (ie en
 
 //Restful API - for a endpoint (ie /decks) , within path allow them to perform CRUD using api path
 
-app.get("/decks", async (req: Request, res: Response) => {
-  const decks = await DeckModel.find(); // Can modify find to include regex and authentication ie which deck belongs to which user
-  // console.log(decks)
-  res.json(decks);
-});
-
-app.post("/decks", async (req: Request, res: Response) => {
-  const newDeck = new DeckModel({
-    title: req.body.title ,
-  })
-
-  const createdDeck = await newDeck.save();
-  res.json(createdDeck);
-
-});
-
+app.get("/decks", getDecksController);
+app.post("/decks", createDeckController);
+app.get("/decks/:deckId", getDeckController);
 //standard: return deleted item back to user
-app.delete("/decks/:deckId", async (req: Request, res: Response) => {
-  const deckId = req.params.deckId; 
-  const deck = await DeckModel.findByIdAndDelete(deckId);
-  res.json({message:"Successfully deleted the entry"})
-
-});
+app.delete("/decks/:deckId", deleteDeckController);
+app.post("/decks/:deckId/cards", createCardForDeckController);
+app.delete("/decks/:deckId/cards/:index", deleteCardOnDeckController);
 
 mongoose.connect(process.env.MONGODB_URI!).then(() => {
   app.listen(PORT, () => {

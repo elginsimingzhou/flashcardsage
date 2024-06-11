@@ -41,6 +41,7 @@ function App() {
   return (
     <div className="App">
       {/* making form accessible -> for people with diability : htmlFor for label, id for input*/}
+        <h1 style={{color:"white"}}>Your Decks</h1>
       <div className="decks">
         <ul className="decks">
           {decks.map((deck) => {
@@ -54,7 +55,7 @@ function App() {
         </ul>
       </div>
       <form>
-        <label htmlFor="deck-title">Deck title</label>
+        <label style={{color:"white"}} htmlFor="deck-title">Deck title</label>
         <input
           name="title"
           id="deck-title"
